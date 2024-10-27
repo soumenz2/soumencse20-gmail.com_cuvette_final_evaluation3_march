@@ -1,0 +1,98 @@
+.sidenav {
+    height: 100vh;
+    width: 20vw;
+    position: sticky; 
+    /* z-index: 1; */
+    top: 0;
+    left: 0;
+    background-color: #faf5f5;
+    overflow-x: hidden; 
+    padding-top: 20px;
+    justify-content:space-between;
+    align-items: center;
+  
+   
+    
+
+  
+  .sidenav a {
+    padding: 6px 8px 6px 16px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+  }
+  
+  .sidenav a:hover {
+    color: #1a0949;
+  }
+
+  }
+  .sidenav ul{
+    list-style-type: none;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 8px 6px 16px;
+    text-decoration: none;
+    font-size: 1.2vw;
+    color: #818181;
+    display: block;
+  
+  }
+  .sidenav ul li{
+    padding: 10px;
+  
+  }
+  .header{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  .list-item{
+    justify-content: center;
+    align-items: center;
+  }
+  .logout-button{
+    position: absolute;
+    display:flex;
+    flex-direction: row;
+    bottom: 10%;
+    left: 20%;
+    font-size: 1vw;
+    color: #333;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    color: red;
+  
+  }
+  .list-item ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .list-item li {
+    margin: 10px 0;
+  }
+  
+  .list-item .active {
+    background-color: #c1e5eb;
+    color: white; 
+    border-radius: 5px; 
+    font-weight: bold;
+  }
+  
+  .list-item a {
+    text-decoration: none;
+    color: black; 
+    display: flex;
+    align-items: center;
+    padding: 10px;
+  }
+  
+  .list-item a:hover {
+    background-color: #f0f0f0; /* Optional: hover effect */
+  }

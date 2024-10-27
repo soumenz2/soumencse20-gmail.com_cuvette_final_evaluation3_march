@@ -1,0 +1,94 @@
+.card1 {
+    width: 500px;
+    height: fit-content;
+    background: rgb(255, 255, 255);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 30px;
+    position: relative;
+    box-shadow: 20px 20px 30px rgba(0, 0, 0, 0.068);
+  }
+  .card-content1 {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .card-heading1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: rgb(27, 27, 27);
+  }
+  .card-heading2 {
+    display: flex;
+    font-size: 20px;
+    font-weight: 700;
+    color: rgb(27, 27, 27);
+    align-items: center;
+    justify-content: center;
+  }
+  .card-description1 {
+    font-weight: 100;
+    color: rgb(102, 102, 102);
+  }
+  .card-button-wrapper1 {
+    width: 100%;
+    display: flex;
+ 
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .input-feild{
+    width:95%;
+    padding:10px;
+    border-radius: 5px;
+    border:1px solid black
+  }
+  .card-button-Add {
+    width: 50%;
+    height: 35px;
+    border-radius: 10px;
+    border:none;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 0 6px 0 rgba(0,0,0,0.1);
+  }
+  .card-button-cancel {
+    width: 50%;
+    height: 35px;
+    border-radius: 10px;
+   
+    cursor: pointer;
+    font-weight: 600;
+    border: 1px solid red;
+
+  }
+  .primary {
+    background-color:  #17A2B8;
+    
+    color: white;
+  }
+  .primary:hover {
+    background-color: #8fcbd4;
+    ;
+  }
+  .secondary {
+    background-color: white;
+
+  }
+  .secondary:hover {
+    background-color: rgb(240, 236, 236);
+
+  }
+  .mail-text{
+    color:#17A2B8 ;
+    margin-right: 5px;
+  }
+
+  
