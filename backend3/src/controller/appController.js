@@ -292,26 +292,29 @@ const getTask = async ( req, res ) => {
 
             if ( req.body?.filter == "TODAY" ) {
                 taskDetails = await TaskModel.findOne( {
-                    taskID: eachTask?.taskID, dueDate: {
-                        $gte: startOfDay,
-                        $lte: endOfDay,
-                    }
+                    taskID: eachTask?.taskID,  
+                    $or: [
+                        { dueDate: { $gte: startOfDay, $lte: endOfDay } },
+                        { dueDate: null } 
+                    ]
                 } )
             } else if ( req.body?.filter == "MONTH" ) {
                 taskDetails = await TaskModel.findOne( {
-                    taskID: eachTask?.taskID, dueDate: {
-                        $gte: startOfMonth,
-                        $lte: endOfMonth,
-                    }
+                    taskID: eachTask?.taskID, 
+                    $or: [
+                        { dueDate: { $gte: startOfMonth, $lte: endOfMonth } },
+                        { dueDate: null } // Include tasks with null due date
+                    ]
                 } )
 
             } else if ( req.body?.filter == "WEEK" ) {
 
                 taskDetails = await TaskModel.findOne( {
-                    taskID: eachTask?.taskID, dueDate: {
-                        $gte: startOfWeek,
-                        $lte: endOfWeek,
-                    }
+                    taskID: eachTask?.taskID,
+                    $or: [
+                        { dueDate: { $gte: startOfWeek, $lte: endOfWeek } },
+                        { dueDate: null } // Include tasks with null due date
+                    ]
                 } )
             } else {
                 taskDetails = await TaskModel.findOne( {
@@ -330,13 +333,13 @@ const getTask = async ( req, res ) => {
                     statusOptions = ["IN-PROGRESS", "DONE", "BACKLOG"];
                     break;
                 case "IN-PROGRESS":
-                    statusOptions = ["DONE", "BACKLOG"];
+                    statusOptions = ["DONE", "BACKLOG","TODO"];
                     break;
                 case "DONE":
-                    statusOptions = [];
+                    statusOptions = ["IN-PROGRESS", "TODO", "BACKLOG"];
                     break;
                 case "BACKLOG":
-                    statusOptions = ["TODO", "IN-PROGRESS"];
+                    statusOptions = ["TODO", "IN-PROGRESS","DONE"];
                     break;
             }
 
@@ -457,14 +460,13 @@ const assignTask = async ( req, res ) => {
 }
 const deleteTask = async (req, res) => {
     try {
-      // Get token from headers
       let token = req.headers['authorization'];
       if (!token) {
         return res.status(403).json({ message: 'No token provided' });
       }
       token = token.split(' ')[1];
   
-      // Verify token and extract userID
+    
       let userID = null;
       jwt.verify(token, config.secret, (err, decoded) => {
         if (err) {
@@ -473,25 +475,23 @@ const deleteTask = async (req, res) => {
         userID = decoded._id;
       });
   
-      // Destructure taskID from req.query
+     
       const { taskID } = req.query;
       if (!taskID) {
         return res.status(400).json({ message: 'Task ID is required' });
       }
   
-      // Check if the task exists and is created by the user
       const task = await TaskModel.findOne({ taskID, createdBy: userID });
       if (!task) {
         return res.status(404).json({ message: 'Task not found or unauthorized' });
       }
   
-      // Delete the task
+
       await TaskModel.deleteOne({ taskID });
   
-      // Delete all checklist items associated with the task
+
       const deletedChecklistCount = await CheckListModel.deleteMany({ taskID });
   
-      // Optionally, delete associated UserTask records
       await UserTaskModel.deleteMany({ taskID });
   
       return res.status(200).json({
@@ -504,6 +504,192 @@ const deleteTask = async (req, res) => {
     }
   };
 
+  const updateTaskStatus = async (req, res) => {
+    try {
+        let token = req.headers['authorization'];
+        if (!token) {
+            return res.status(403).json({ message: 'No token provided' });
+        }
+        token = token.split(' ')[1];
+
+        let userID = null;
+        jwt.verify(token, config.secret, (err, decoded) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+            userID = decoded?._id;
+        });
+
+        console.log(userID);
+
+        // Find the existing task by taskID
+        const existingTask = await TaskModel.findOne({ taskID: req.body.taskID });
+        if (!existingTask) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        // Update task details (excluding assignee and due date)
+        existingTask.status = req.body?.status || existingTask.status;
+
+        await existingTask.save();
+
+  
+
+        return res.status(200).json({
+            message: "Task Updated",
+            task: existingTask,
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({ message: 'Internal error', error: JSON.stringify(error) });
+    }
+}
+const getTaskCounts = async (req, res) => {
+    try {
+      let token = req.headers['authorization'];
+      if (!token) {
+        return res.status(403).json({ message: 'No token provided' });
+      }
+      token = token.split(' ')[1];
+  
+      let userID = null;
+      jwt.verify(token, config.secret, (err, decoded) => {
+        if (err) {
+          return res.status(401).json({ message: 'Invalid token' });
+        }
+        userID = decoded._id;
+      });
+  
+      const existingUser = await UserModel.findOne({ userID });
+      if (!existingUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      const taskList = await UserTaskModel.find( { email: existingUser?.email } )
+      
+  
+      // Query counts for each status and priority level
+      let backlogCount = 0;
+      let todoCount = 0;
+      let inProgressCount = 0;
+      let doneCount = 0;
+      let highPriorityCount = 0;
+      let mediumPriorityCount = 0;
+      let lowPriorityCount = 0;
+      for(task of taskList){
+        const taskDetails=await TaskModel.findOne({taskID:task?.taskID})
+        if(taskDetails.status == "TODO"){
+            todoCount+=1;
+        }else if(taskDetails.status == "IN-PROGRESS"){
+            inProgressCount+=1;
+        }else if( taskDetails?.status == "BACKLOG" ){
+            backlogCount+=1;
+        }else{
+            doneCount+=1;
+        }
+        if( taskDetails.priority == "HIGH PRIORITY"){
+            highPriorityCount+=1;
+        }else if(taskDetails.priority == "MODERATE PRIORITY"){
+            mediumPriorityCount+=1;
+        }else{
+            lowPriorityCount+=1;
+        }
+        
+
+      }
+  
+      // Return the counts in response
+      return res.status(200).json({
+        message: "Task counts fetched successfully",
+        counts: {
+          backlog: backlogCount,
+          todo: todoCount,
+          inProgress: inProgressCount,
+          done: doneCount,
+          highPriority: highPriorityCount,
+          mediumPriority: mediumPriorityCount,
+          lowPriority: lowPriorityCount
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching task counts:', error);
+      return res.status(500).json({ message: 'Internal server error', error: JSON.stringify(error) });
+    }
+  };
+
+
+  const getTaskByID = async ( req, res ) => {
+    try {
+       
+        const {taskID} = req.query;
+        let taskDetails = await TaskModel.findOne({taskID})
+
+        let checkList = await CheckListModel.find( { taskID: taskDetails?.taskID } )
+            
+        return res.status( 200 ).json( {
+            message: "Data Fetched Successfully",
+            task: {
+                taskName: taskDetails.taskName,
+                dueDate: taskDetails.dueDate,
+                priority:taskDetails.priority,
+                Checklist:checkList
+            }
+        } )
+           
+        }
+   
+
+     catch ( error ) {
+        console.log( error )
+        return res.status( 400 ).json( { message: 'Internal error', error: JSON.stringify( error ) } );
+    }
+}
+
+const updateTaskChecklist = async (req, res) => {
+    try {
+        let token = req.headers['authorization'];
+        if (!token) {
+            return res.status(403).json({ message: 'No token provided' });
+        }
+        token = token.split(' ')[1];
+
+        let userID = null;
+        jwt.verify(token, config.secret, (err, decoded) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+            userID = decoded?._id;
+        });
+
+        console.log(userID);
+
+        
+        const existingChecklist = await CheckListModel.findOne({ checkListID: req.body.checkListID });
+        if (!existingChecklist) {
+            return res.status(404).json({ message: 'checkList not found' });
+        }
+
+       
+        existingChecklist.isDone = req.body?.newStatus;
+
+        await existingChecklist.save();
+
+  
+
+        return res.status(200).json({
+            message: "Checklist Updated",
+            task: existingChecklist,
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({ message: 'Internal error', error: JSON.stringify(error) });
+    }
+}
+
+
+
+
 
 
 module.exports = {
@@ -513,6 +699,10 @@ module.exports = {
     getEmail,
     assignTask,
     updateTask,
-    deleteTask
+    deleteTask,
+    updateTaskStatus,
+    getTaskCounts,
+    getTaskByID,
+    updateTaskChecklist
     
 }

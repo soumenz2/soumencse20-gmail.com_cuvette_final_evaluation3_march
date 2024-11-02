@@ -1,88 +1,88 @@
 import React, { useState, useEffect } from 'react';
 import './TaskModal.css';
-import { updateTask ,getEmail} from '../../api/apiClient'; // Adjust the import according to your API client
+import { updateTask, getEmail } from '../../api/apiClient'; // Adjust the import according to your API client
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { MdOutlineDeleteForever } from "react-icons/md";
 
-const UpdateTaskModal = ({ taskData, onClose }) => {
-  const [title, setTitle] = useState('');
-  const [priority, setPriority] = useState('');
-  const [checklist, setChecklist] = useState([]);
-  const [dueDate, setDueDate] = useState('');
-  const [status, setStatus] = useState('');
-  const [emails, setEmails] = useState([]);
-  const [assignee, setAssignee] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+const UpdateTaskModal = ( { onClose , taskData} ) => {
+  const [title, setTitle] = useState( '' );
+  const [priority, setPriority] = useState( '' );
+  const [checklist, setChecklist] = useState( [] );
+  const [dueDate, setDueDate] = useState( '' );
+  const [status, setStatus] = useState( '' );
+  const [emails, setEmails] = useState( [] );
+  const [assignee, setAssignee] = useState( '' );
+  const [isOpen, setIsOpen] = useState( false );
+  const [searchTerm, setSearchTerm] = useState( '' );
 
-  // Fetch emails for assignee selection
-  useEffect(() => {
+ 
+  useEffect( () => {
     const fetchEmails = async () => {
       const response = await getEmail();
-      if (response.message === 'Data Fetched Successfully') {
-        setEmails(response.email);
+      if ( response.message === 'Data Fetched Successfully' ) {
+        setEmails( response.email );
       } else {
-        console.error(response.message);
+        console.error( response.message );
       }
     };
     fetchEmails();
-  }, []);
+  }, [] );
 
   // Populate the modal with task data when it opens
-  useEffect(() => {
-    console.log("taskData",taskData)
-    if (taskData) {
-      setTitle(taskData.taskName);
-      setPriority(taskData.priority);
-      setChecklist(taskData.checkList);
-      setDueDate(taskData.dueDate);
-      setAssignee(taskData.assignee || '');
+  useEffect( () => {
+    console.log( "taskData", taskData )
+    if ( taskData ) {
+      setTitle( taskData.taskName );
+      setPriority( taskData.priority );
+      setChecklist( taskData.checkList );
+      setDueDate( taskData.dueDate );
+      setAssignee( taskData.assignee || '' );
     }
-  }, [taskData]);
+  }, [taskData] );
 
-//   const toggleDropdown = () => setIsOpen(!isOpen);
-//   const handleSearchChange = (e) => setSearchTerm(e.target.value);
-  
+  //   const toggleDropdown = () => setIsOpen(!isOpen);
+  //   const handleSearchChange = (e) => setSearchTerm(e.target.value);
+
   const handleAddTask = () => {
-    setChecklist([...checklist, { title: '', isDone: false }]);
+    setChecklist( [...checklist, { title: '', isDone: false }] );
   };
 
-  const handleTaskChange = (index, value) => {
+  const handleTaskChange = ( index, value ) => {
     const updatedChecklist = [...checklist];
     updatedChecklist[index].title = value;
-    setChecklist(updatedChecklist);
+    setChecklist( updatedChecklist );
   };
 
-  const handleCheckboxChange = (index) => {
+  const handleCheckboxChange = ( index ) => {
     const updatedChecklist = [...checklist];
     updatedChecklist[index].isDone = !updatedChecklist[index].isDone;
-    setChecklist(updatedChecklist);
+    setChecklist( updatedChecklist );
   };
 
-  const handleDeleteTask = (index) => {
-    const updatedChecklist = checklist.filter((_, i) => i !== index);
-    setChecklist(updatedChecklist);
+  const handleDeleteTask = ( index ) => {
+    const updatedChecklist = checklist.filter( ( _, i ) => i !== index );
+    setChecklist( updatedChecklist );
   };
 
-  const handleDueDateChange = (e) => setDueDate(e.target.value);
-  
-  const handleAssigneeSelect = (email) => {
-    setAssignee(email);
-    setIsOpen(false);
+  const handleDueDateChange = ( e ) => setDueDate( e.target.value );
+
+  const handleAssigneeSelect = ( email ) => {
+    setAssignee( email );
+    setIsOpen( false );
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async ( e ) => {
     e.preventDefault();
-    
-    const allFilled = checklist.every(task => task.title.trim() !== '');
-    if (!allFilled) {
-      toast.error('Please fill in all checklist items before submitting.');
+
+    const allFilled = checklist.every( task => task.title.trim() !== '' );
+    if ( !allFilled ) {
+      toast.error( 'Please fill in all checklist items before submitting.' );
       return;
     }
 
     const taskUpdateData = {
-    taskID: taskData.taskID, 
+      taskID: taskData.taskID,
       priority,
       title,
       checklist,
@@ -90,37 +90,38 @@ const UpdateTaskModal = ({ taskData, onClose }) => {
     };
 
     try {
-        const result = await updateTask(taskUpdateData);
-        if (result.message) {
-          // Handle success or error message
-          console.log(result.message);
-        } else {
-          // Handle the updated task data
-          console.log('Task updated successfully:', result.task);
-        }
-    } catch (error) {
-      console.error('Error while updating task:', error);
+      const result = await updateTask( taskUpdateData );
+      if ( result.message ) {
+        // Handle success or error message
+        onClose()
+        console.log( result.message );
+      } else {
+        // Handle the updated task data
+        console.log( 'Task updated successfully:', result.task );
+      }
+    } catch ( error ) {
+      console.error( 'Error while updating task:', error );
     }
   };
 
-  function formatDate(dateString) {
-    const date = new Date(dateString);
+  function formatDate( dateString ) {
+    const date = new Date( dateString );
     const day = date.getDate();
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const month = monthNames[date.getMonth()];
 
-    const getOrdinalSuffix = (day) => {
-        if (day > 3 && day < 21) return "th"; // catch all teens (11th-13th)
-        switch (day % 10) {
-            case 1: return "st";
-            case 2: return "nd";
-            case 3: return "rd";
-            default: return "th";
-        }
+    const getOrdinalSuffix = ( day ) => {
+      if ( day > 3 && day < 21 ) return "th"; // catch all teens (11th-13th)
+      switch ( day % 10 ) {
+        case 1: return "st";
+        case 2: return "nd";
+        case 3: return "rd";
+        default: return "th";
+      }
     };
 
-    return `${day}${getOrdinalSuffix(day)} ${month}`;
-}
+    return `${ day }${ getOrdinalSuffix( day ) } ${ month }`;
+  }
 
   return (
     <div className="modal-overlay">
@@ -130,7 +131,7 @@ const UpdateTaskModal = ({ taskData, onClose }) => {
         <input
           type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={( e ) => setTitle( e.target.value )}
           placeholder="Enter Task Title"
           required
         />
@@ -139,22 +140,22 @@ const UpdateTaskModal = ({ taskData, onClose }) => {
           <label>Select Priority *</label>
           <button
             type="button"
-            className={`priority-btn ${priority === 'high' ? 'active' : ''}`}
-            onClick={() => setPriority('high')}
+            className={`priority-btn ${ priority === 'HIGH PRIORITY' ? 'active' : '' }`}
+            onClick={() => setPriority( 'HIGH PRIORITY' )}
           >
             HIGH PRIORITY
           </button>
           <button
             type="button"
-            className={`priority-btn ${priority === 'moderate' ? 'active' : ''}`}
-            onClick={() => setPriority('moderate')}
+            className={`priority-btn ${ priority === 'MODERATE PRIORITY' ? 'active' : '' }`}
+            onClick={() => setPriority( 'MODERATE PRIORITY' )}
           >
             MODERATE PRIORITY
           </button>
           <button
             type="button"
-            className={`priority-btn ${priority === 'low' ? 'active' : ''}`}
-            onClick={() => setPriority('low')}
+            className={`priority-btn ${ priority === 'LOW PRIORITY' ? 'active' : '' }`}
+            onClick={() => setPriority( 'LOW PRIORITY' )}
           >
             LOW PRIORITY
           </button>
@@ -163,28 +164,28 @@ const UpdateTaskModal = ({ taskData, onClose }) => {
 
 
         <label>Checklist ({checklist.length}) *</label>
-        {checklist.map((task, index) => (
+        {checklist.map( ( task, index ) => (
           <div key={index} className="checklist-item">
             <input
               type="checkbox"
               checked={task.isDone}
-              onChange={() => handleCheckboxChange(index)}
+              onChange={() => handleCheckboxChange( index )}
             />
             <input
               type="text"
               value={task.title}
-              onChange={(e) => handleTaskChange(index, e.target.value)}
+              onChange={( e ) => handleTaskChange( index, e.target.value )}
               placeholder="Add a task"
             />
             <button
               type="button"
               className="delete-task"
-              onClick={() => handleDeleteTask(index)}
+              onClick={() => handleDeleteTask( index )}
             >
               <MdOutlineDeleteForever />
             </button>
           </div>
-        ))}
+        ) )}
         <button
           type="button"
           className="add-task-btn"
@@ -195,8 +196,9 @@ const UpdateTaskModal = ({ taskData, onClose }) => {
 
         <div className="modal-footer">
           <div>
-            <label>Select Due Date *</label>
-            <div>{formatDate(dueDate)}</div>
+            {dueDate!=null && <label> Due Date *</label>}
+            
+            <div>{dueDate!=null && formatDate( dueDate )}</div>
           </div>
           <div>
             <button

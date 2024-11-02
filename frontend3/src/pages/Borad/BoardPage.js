@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import './BoardPage.css'
 import { BsPeople } from "react-icons/bs";
 import { SlArrowDown } from "react-icons/sl";
@@ -10,202 +10,210 @@ import { IoIosCloseCircleOutline } from 'react-icons/io';
 import { FaLessThanEqual } from 'react-icons/fa';
 import AddPeopleModal from '../ModalPage/AddPeople';
 import { getTasks } from '../../api/apiClient';
+import { ToastContainer, toast } from "react-toastify";
+import { getuser } from '../../api/apiClient';
 function getDate() {
   const today = new Date();
-  const month = today.getMonth() + 1;
+  const day = today.getDate();
+  const month = today.toLocaleString( 'default', { month: 'short' } );
   const year = today.getFullYear();
-  const date = today.getDate();
-  return `${month}/${date}/${year}`;
-  
+
+  const getDaySuffix = ( day ) => {
+    if ( day > 3 && day < 21 ) return 'th';
+    switch ( day % 10 ) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  };
+
+  return `${ day }${ getDaySuffix( day ) } ${ month }, ${ year }`;
 }
-// const tasks = [
-//   {
-//     id: 1,
-//     priority: "HIGH PRIORITY",
-//     title: "Hero section",
-//     checklist: [
-//       { id: 1, text: "Task to be done", done: true },
-//       { id: 2, text: "Task to be done", done: false },
-//       { id: 3, text: "Task to be done ede lorem Ipsum is a Dummy text t", done: false },
-//     ],
-//     date: "Feb 10th",
-//     status: ["Progress", "To-Do", "Done"],
-//   },
-//   {
-//     id: 2,
-//     priority: "MODERATE PRIORITY",
-//     title: "Typography change",
-//     checklist: [
-//       { id: 1, text: "Task to be done", done: false },
-//       { id: 2, text: "Task to be done", done: false },
-//     ],
-//     date: "Feb 12th",
-//     status: ["To-Do"],
-//   },
-// ];
+
 
 
 const BoardPage = () => {
-  const [currentDate, setCurrentDate] = useState(getDate());
-  const [isTaskModalOpen,setIsTaskModalOpen]=useState(false)
-  const [isAddPeopleModalOpen,setIsAddPeopleModalOpen]=useState(false)
-  const [tasks, setTasks] = useState({ todo: [], backLog: [], inProgress: [], done: [] });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filterValue, setFilterValue] = useState("WEEK"); 
+  const [currentDate, setCurrentDate] = useState( getDate() );
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState( false )
+  const [isAddPeopleModalOpen, setIsAddPeopleModalOpen] = useState( false )
+  const [tasks, setTasks] = useState( { todo: [], backlog: [], inProgress: [], done: [] } );
+  const [loading, setLoading] = useState( true );
+  const [error, setError] = useState( null );
+  const [filterValue, setFilterValue] = useState( "WEEK" );
+  const [username,setUserName]=useState('')
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const data = await getuser();
+      setUserName(data.name);
+    };
 
-  const fetchTasks = async (filter) => {
-    setLoading(true);
+    fetchUserData();
+  }, []);
+  const fetchTasks = async ( filter ) => {
+    setLoading( true );
     try {
-      const response = await getTasks(filter); // Pass the filter to your API call
-      if (response?.message === "Data Fetched Successfully") {
-        const fetchedTasks = response.task; 
-        console.log(fetchedTasks)
+      const response = await getTasks( filter ); // Pass the filter to your API call
+      if ( response?.message === "Data Fetched Successfully" ) {
+        const fetchedTasks = response.task;
+        console.log( fetchedTasks )
         const categorizedTasks = {
           todo: fetchedTasks.todo || [],
           backlog: fetchedTasks.backLog || [],
           inProgress: fetchedTasks.inProgress || [],
           completed: fetchedTasks.done || []
         };
-        setTasks(categorizedTasks);
-        console.log(categorizedTasks)
+        setTasks( categorizedTasks );
+        console.log( categorizedTasks )
       } else {
-        setError(response);
+        setError( response );
       }
-    } catch (err) {
-      setError(err);
+    } catch ( err ) {
+      setError( err );
     } finally {
-      setLoading(false);
+      setLoading( false );
     }
   };
 
-  useEffect(() => {
-    fetchTasks(filterValue);
-  }, [filterValue]); 
+
+  useEffect( () => {
+    fetchTasks( filterValue );
+  }, [filterValue] );
 
 
-  const isOpen=()=>{
-    setIsTaskModalOpen(true)
+  const isOpen = () => {
+    setIsTaskModalOpen( true )
   }
-  const onClose=()=>{
-    setIsTaskModalOpen(false)
+  const onClose = () => {
+    setIsTaskModalOpen( false )
   }
-  const isAddPeopleOpen=()=>{
-    setIsAddPeopleModalOpen(true)
+  const isAddPeopleOpen = () => {
+    setIsAddPeopleModalOpen( true )
   }
-  const onAddPeopleClose=()=>{
-    setIsAddPeopleModalOpen(false)
+  const onAddPeopleClose = () => {
+    setIsAddPeopleModalOpen( false )
   }
-  const handleFilterChange = (e) => {
-    setFilterValue(e.target.value);
+  const handleFilterChange = ( e ) => {
+    setFilterValue( e.target.value );
   };
 
-  if (loading) {
-    return (
-      <div className="loading-overlay">
-    <div className="loading-container">
-      <p>Loading tasks...</p>
-      <div className="spinner"></div>
-    </div>
+  if ( loading ) {
+    return (<div className="loading-overlay">
+      <div className="loading-container">
+        <p>Loading tasks...</p>
+        <div className="loader">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
   </div>
+      </div>
+    </div>
     );
   }
 
-  if (error) {
+  if ( error ) {
     return <p>Error loading tasks: {error.message || 'Something went wrong'}</p>;
   }
-  
+
 
   return (
     <div>
+      <ToastContainer />
       <div className="section1">
         <div className="">
-          <h3>Welcome! Soumen</h3>
+          <h3>Welcome! {username}</h3>
         </div>
         <div className="">
-        <p>{currentDate}</p>
+          <p>{currentDate}</p>
         </div>
       </div>
       <div className="section2">
-      <div className="sub-section">
-        <div className=""><h2 className="">Board</h2></div>
-        <div className="">
-        <button className="button1" onClick={isAddPeopleOpen}>
-        <BsPeople />
-          <p className="btn-text">Add People</p>
-        </button>
+        <div className="sub-section">
+          <div className=""><h2 className="">Board</h2></div>
+          <div className="">
+            <button className="button1" onClick={isAddPeopleOpen}>
+              <BsPeople />
+              <p className="btn-text">Add People</p>
+            </button>
+          </div>
+
         </div>
-       
-      </div>
-      <div className="sub-section1">
-        
-       
-        <label className="dropdown">
+        <div className="sub-section1">
 
-  <div className="dd-button">
-  This Week
-  </div>
 
-  <input type="checkbox" className="dd-input" id="test" />
+          <label className="dropdown">
 
-  <ul className="dd-menu">
-    <li onClick={() => handleFilterChange({ target: { value: "TODAY" } })}>Today</li>
-    <li onClick={() => handleFilterChange({ target: { value: "WEEK" } })}>This Week</li>
-    <li onClick={() => handleFilterChange({ target: { value: "MONTH" } })}>This Month</li>
-    
-   
-  </ul>
-  
-</label>
+            <div className="dd-button">
+              
+              {filterValue==="WEEK"?"This week":filterValue}
+            </div>
+
+            <input type="checkbox" className="dd-input" id="test" />
+
+            <ul className="dd-menu">
+              <li onClick={() => handleFilterChange( { target: { value: "TODAY" } } )}>Today</li>
+              <li onClick={() => handleFilterChange( { target: { value: "WEEK" } } )}>This Week</li>
+              <li onClick={() => handleFilterChange( { target: { value: "MONTH" } } )}>This Month</li>
+
+
+            </ul>
+
+          </label>
+        </div>
       </div>
-      </div>
-     
+
       <div className="section3">
         <div className="section-box">
           <div className="hedaer-box">
             <div className=""><h4 className="">Backlog</h4></div>
             <button type="" className="button-header"><TfiLayers /></button>
           </div>
-          {tasks?.backlog?.map((task, index) => (
-            <TaskBox key={task.id} task={task} />
-          ))}
-          
+          {tasks?.backlog?.map( ( task, index ) => (
+            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} />
+          ) )}
+
 
         </div>
         <div className="section-box">
-        <div className="hedaer-box">
+          <div className="hedaer-box">
             <div className=""><h4 className="">To Do</h4></div>
             <div className="">
               <button type="" className="button-header" onClick={isOpen}><FaPlus /></button>
-            <button type="" className="button-header"><TfiLayers /></button>
-          
+              <button type="" className="button-header"><TfiLayers /></button>
+
+            </div>
           </div>
-          </div>
-          {tasks.todo.map((task) => (
-            <TaskBox key={task.id} task={task} />
-          ))}
+          {tasks.todo.map( ( task ) => (
+            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} />
+          ) )}
         </div>
         <div className="section-box">
-        <div className="hedaer-box">
+          <div className="hedaer-box">
             <div className=""><h4 className="">In Progrss</h4></div>
             <button type="" className="button-header"><TfiLayers /></button>
           </div>
+          {tasks.inProgress.map( ( task ) => (
+            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} />
+          ) )}
         </div>
         <div className="section-box">
-        <div className="hedaer-box">
+          <div className="hedaer-box">
             <div className=""><h4 className="">Completed</h4></div>
             <div className="">
-            <button type="" className="button-header"><TfiLayers /></button>
+              <button type="" className="button-header"><TfiLayers /></button>
+            </div>
           </div>
-          </div>
-          {tasks.completed.map((task) => (
-            <TaskBox key={task.id} task={task} />
-          ))}
+          {tasks.completed.map( ( task ) => (
+            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} />
+          ) )}
         </div>
       </div>
       {
-        isTaskModalOpen && <TaskModal onClose={onClose} />
+        isTaskModalOpen && <TaskModal onClose={onClose} filterValue={filterValue} fetchTasks={fetchTasks} />
       }
       {
         isAddPeopleModalOpen && <AddPeopleModal onAddPeopleClose={onAddPeopleClose} />

@@ -5,6 +5,7 @@
     align-items: center;
     justify-content: center;
     min-height: 80vh;
+    width:30vw
 
 }
 
@@ -45,39 +46,6 @@
     font-size: 8px;
 }
 
-.dropdown {
-    display: inline-block;
-    position: relative;
-}
-
-.dd-button {
-    background-color: #fff;
-    border-radius: 4px;
-    cursor: pointer;
-    display: inline-block;
-    padding: 10px 30px 10px 20px;
-    white-space: nowrap;
-}
-
-.dd-input {
-    display: none;
-}
-
-.dd-input+.dd-menu {
-    display: none;
-}
-
-.dd-menu {
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 0 6px 0 #0000001a;
-    list-style-type: none;
-    margin: 2px 0 0;
-    padding: 0;
-    position: absolute;
-    top: 100%;
-}
 
 .task-title {
     font-size: 18px;

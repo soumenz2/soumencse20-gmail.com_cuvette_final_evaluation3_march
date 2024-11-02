@@ -46,10 +46,11 @@ export const login = async (credentials) => {
     
   try {
     const response = await apiClient.post('/login', credentials);
+    store.dispatch(setToken(response.data.token));
     return response.data; 
    
   } catch (error) {
-    return error.response?.data || { msg: 'An error occurred during login' };
+    return { success: false, msg: error.response?.data?.msg || 'An error occurred during login' };
   }
 };
 
@@ -201,5 +202,140 @@ export const updateUser = async (userData) => {
   } catch (error) {
     console.error('Update User Error:', error.message);
     return error.response?.data || { message: 'An error occurred while updating user information' };
+  }
+};
+
+export const deleteTask = async (taskID) => {
+  try {
+    const token = store.getState().user.tokenId;
+
+    if (!token) {
+      return { message: 'No token provided' };
+    }
+    const response = await apiClient.delete('/deleteTask', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: { taskID },
+    });
+    return response.data; 
+  } catch (error) {
+
+    return error.response?.data || { message: 'An error occurred while deleting the task' };
+  }
+};
+export const updateTaskStatus = async (taskData) => {
+  try {
+    const token = store.getState().user.tokenId;
+
+    if (!token) {
+      return { message: 'No token provided' };
+    }
+
+    const response = await apiClient.put(
+      '/updateTaskStatus',
+      taskData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Update Task Error:', error.message);
+    return error.response?.data || { message: 'An error occurred while updating the task' };
+  }
+};
+
+export const getuser = async () => {
+  try {
+    const token = store.getState().user.tokenId;
+
+    if (!token) {
+      return { message: 'No token provided' };
+    }
+
+    const response = await apiClient.get(
+      '/getuser', 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Fetch Tasks Error:', error.message);
+    return error.response?.data || { message: 'An error occurred while fetching tasks' };
+  }
+};
+export const getTaskCounts = async () => {
+  try {
+    const token = store.getState().user.tokenId;
+
+    if (!token) {
+      return { message: 'No token provided' };
+    }
+
+    const response = await apiClient.get(
+      '/getTaskCounts', 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Fetch Tasks Error:', error.message);
+    return error.response?.data || { message: 'An error occurred while fetching analytics data' };
+  }
+};
+export const getTaskByID = async (taskID) => {
+  try {
+
+    if (!taskID) {
+      return { message: 'taskID is required' };
+    }
+
+    const response = await apiClient.get('/getTaskByID', {
+      params: {
+        taskID, 
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Fetch Task by ID Error:', error.message);
+    return error.response?.data || { message: 'An error occurred while fetching task details' };
+  }
+};
+
+export const updateTaskChecklist = async (payload) => {
+  try {
+    const token = store.getState().user.tokenId;
+    console.log(payload)
+ 
+
+    if (!token) {
+      return { message: 'No token provided' };
+    }
+    const response = await apiClient.put(
+      '/updateTaskChecklist',
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Fetch Task by ID Error:', error.message);
+    return error.response?.data || { message: 'An error occurred while updating checklist' };
   }
 };

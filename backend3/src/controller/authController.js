@@ -6,6 +6,7 @@ const mongoose = require( 'mongoose' );
 
 const { validationResult } = require( 'express-validator' );
 const config = require( '../config' );
+const UserTaskModel = require( '../model/userTaskModel' );
 
 const signup = async ( req, res ) => {
     try {
@@ -116,20 +117,36 @@ const updateUser = async (req, res) => {
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
-  
+      console.log("user email",user.email)
+      const userTasks = await UserTaskModel.find({ email: user.email });
+      console.log("usertask",userTasks)
+      for(const usertask of userTasks){
+        usertask.email = email; 
+        await usertask.save(); 
+      }
+    //   await Promise.all(userTasks.map(async(userTask) => {
+
+    //     userTask.email = user.email; 
+    //     await userTask.save(); 
+    //   }));
+
       if (username) user.username = username;
       if (username) user.email = email;
   
-      // If oldPassword and newPassword are provided, validate and update the password
+
       if (oldPassword && newPassword) {
         const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
         if (!isPasswordValid) {
           return res.status(400).json({ message: 'Old password is incorrect' });
         }
-        user.password = await bcrypt.hash(newPassword, 10); // Hash the new password
+        const salt = bcrypt.genSaltSync( 10 );
+        const hashpassword = bcrypt.hashSync( newPassword, salt )
+        user.password = hashpassword
       }
   
       await user.save();
+   
+
   
       return res.status(200).json({ message: 'User updated successfully' });
     } catch (error) {
@@ -138,7 +155,37 @@ const updateUser = async (req, res) => {
     }
   };
   
-  
+  const getuser=async(req,res)=>{
+    try{
+      let token = req.headers['authorization'];
+      if (!token) {
+          return res.status(403).json({ message: 'No token provided' });
+      }
+      token = token.split(' ')[1];
+
+      let userID = null;
+      jwt.verify(token, config.secret, (err, decoded) => {
+          if (err) {
+              return res.status(401).json({ message: 'Invalid token' });
+          }
+          userID = decoded?._id;
+      });
+
+      console.log(userID);
+      const user = await UserModel.findOne({userID :userID});
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      return res.status(200).json({
+        message: "User Details Fetched sucessfully",
+        name:user.username,
+        email:user.email
+    });
+    }catch(error){
+      console.error('Update User Error:', error);
+      return res.status(500).json({ message: 'An error occurred while getting user data' });
+    }
+  }
 
 
 
@@ -146,6 +193,7 @@ const updateUser = async (req, res) => {
 module.exports = {
     signup,
     login,
-    updateUser
+    updateUser,
+    getuser
 
 }

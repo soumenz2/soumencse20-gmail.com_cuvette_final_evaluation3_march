@@ -79,10 +79,12 @@
   }
   
   .list-item .active {
-    background-color: #c1e5eb;
+    background-color: #6dc4d3;
     color: white; 
     border-radius: 5px; 
     font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
   }
   
   .list-item a {
@@ -94,5 +96,5 @@
   }
   
   .list-item a:hover {
-    background-color: #f0f0f0; /* Optional: hover effect */
+    background-color: #def0f0; /* Optional: hover effect */
   }

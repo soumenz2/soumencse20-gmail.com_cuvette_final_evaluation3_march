@@ -54,14 +54,14 @@ const LoginSignUp = () => {
         const result = await login(values);
         setLoading(false); // Set loading to false
         if (result.success) {
-          dispatch(setToken(result.token));
+         
         } else {
-          toast.error(result.message);
+          toast.error(result.msg);
         }
       } catch (error) {
-        setLoading(false); // Ensure loading is false on error
-        toast.error(error.message);
-        console.error('Error during login:', error);
+        setLoading(false); 
+      toast.error(error.response?.data?.msg || 'An error occurred during login');
+      console.error('Error during login:', error);
       }
     }
   });
@@ -95,11 +95,18 @@ const LoginSignUp = () => {
           setIsLogin(true);
         } else {
           toast.error(result.message);
+          console.error('Error during signup:', result.msg);
         }
-      } catch (error) {
-        setLoading(false); 
-        toast.error(error.message);
-        console.error('Error during signup:', error);
+      } catch (err) {
+        if (err.response) {
+          const errorMessage = err.response.data.msg;
+          toast.error(errorMessage)
+          console.log(errorMessage);
+         
+        } else {
+          
+          toast.error("Login failed")
+        }
       }
     }
   });
@@ -118,7 +125,7 @@ const LoginSignUp = () => {
       <div className="content-right">
         {
           isLogin ? (
-            <form className="form_container" onSubmit={loginformik.handleSubmit} method="POST">
+            <form className="form_container1" onSubmit={loginformik.handleSubmit} method="POST">
               <div className="title_container">
                 <p className="title">Login to your Account</p>
               </div>
@@ -185,7 +192,7 @@ const LoginSignUp = () => {
               </button>
             </form>
           ) : (
-            <form className="form_container" onSubmit={registerformik.handleSubmit} method="POST">
+            <form className="form_container1" onSubmit={registerformik.handleSubmit} method="POST">
               <div className="title_container">
                 <p className="title">Register a new Account</p>
               </div>
