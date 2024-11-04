@@ -42,6 +42,30 @@ const BoardPage = () => {
   const [error, setError] = useState( null );
   const [filterValue, setFilterValue] = useState( "WEEK" );
   const [username,setUserName]=useState('')
+  const [inProgressCollapseTrigger1, setInProgressCollapseTrigger1] = useState(false);
+  const [inProgressCollapseTrigger2, setInProgressCollapseTrigger2] = useState(false);
+  const [inProgressCollapseTrigger3, setInProgressCollapseTrigger3]= useState(false);
+  const [inProgressCollapseTrigger4, setInProgressCollapseTrigger4] = useState(false);
+  const [completedCollapseTrigger, setCompletedCollapseTrigger] = useState(false);
+
+
+  const toggleInProgressCollapse1 = () => {
+    setInProgressCollapseTrigger1((prev) => !prev);
+  };
+  const toggleInProgressCollapse2 = () => {
+    setInProgressCollapseTrigger2((prev) => !prev);
+  };
+  const toggleInProgressCollapse3 = () => {
+    setInProgressCollapseTrigger3((prev) => !prev);
+  };
+  const toggleInProgressCollapse4 = () => {
+    setInProgressCollapseTrigger4((prev) => !prev);
+  };
+
+  // Toggles collapse state for the Completed section
+  const toggleCompletedCollapse = () => {
+    setCompletedCollapseTrigger((prev) => !prev);
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -170,10 +194,10 @@ const BoardPage = () => {
         <div className="section-box">
           <div className="hedaer-box">
             <div className=""><h4 className="">Backlog</h4></div>
-            <button type="" className="button-header"><TfiLayers /></button>
+            <button type="" className="button-header" onClick={toggleInProgressCollapse1}><TfiLayers /></button>
           </div>
           {tasks?.backlog?.map( ( task, index ) => (
-            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} />
+            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} collapseTrigger={inProgressCollapseTrigger1} />
           ) )}
 
 
@@ -183,32 +207,32 @@ const BoardPage = () => {
             <div className=""><h4 className="">To Do</h4></div>
             <div className="">
               <button type="" className="button-header" onClick={isOpen}><FaPlus /></button>
-              <button type="" className="button-header"><TfiLayers /></button>
+              <button type="" className="button-header" onClick={toggleInProgressCollapse2}><TfiLayers /></button>
 
             </div>
           </div>
           {tasks.todo.map( ( task ) => (
-            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} />
+            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} collapseTrigger={inProgressCollapseTrigger2} />
           ) )}
         </div>
         <div className="section-box">
           <div className="hedaer-box">
             <div className=""><h4 className="">In Progrss</h4></div>
-            <button type="" className="button-header"><TfiLayers /></button>
+            <button type="" className="button-header" onClick={toggleInProgressCollapse3}><TfiLayers /></button>
           </div>
           {tasks.inProgress.map( ( task ) => (
-            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} />
+            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} collapseTrigger={inProgressCollapseTrigger3} />
           ) )}
         </div>
         <div className="section-box">
           <div className="hedaer-box">
             <div className=""><h4 className="">Completed</h4></div>
             <div className="">
-              <button type="" className="button-header"><TfiLayers /></button>
+              <button type="" className="button-header" onClick={toggleInProgressCollapse4}><TfiLayers /></button>
             </div>
           </div>
           {tasks.completed.map( ( task ) => (
-            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} />
+            <TaskBox key={task.id} task={task} filterValue={filterValue} fetchTasks={fetchTasks} collapseTrigger={inProgressCollapseTrigger4} />
           ) )}
         </div>
       </div>

@@ -63,7 +63,7 @@ const AnalyticsPage = () => {
       <h3>Analytics</h3>
       {loading ? (<div className="loading-overlay">
       <div className="loading-container">
-        <p>Loading Profile...</p>
+        <p>Loading Analytic data...</p>
         <div class="loader">
     <span></span>
     <span></span>

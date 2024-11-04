@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { SlArrowDown, SlArrowUp } from "react-icons/sl";
 import { HiDotsHorizontal } from "react-icons/hi";
 import "./TaskBox.css";
@@ -10,7 +10,7 @@ import { updateTaskStatus } from "../../api/apiClient";
 import { updateTaskChecklist } from "../../api/apiClient";
 import { ToastContainer, toast } from "react-toastify";
 
-const TaskBox = ({ task, filterValue, fetchTasks }) => {
+const TaskBox = ({ task, filterValue, fetchTasks , collapseTrigger }) => {
   const [checklistVisible, setChecklistVisible] = useState(false);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isUpdateModalOpen, setUpdateModalOpen] = useState(false);
@@ -19,6 +19,10 @@ const TaskBox = ({ task, filterValue, fetchTasks }) => {
   const token = useSelector((state) => state.user.tokenId);
   const decodedToken = jwtDecode(token);
   const userId = decodedToken._id;
+
+  useEffect(() => {
+    setChecklistVisible(false);
+  }, [collapseTrigger]);
 
   const openDeleteModal = () => setDeleteModalOpen(true);
   const closeDeleteModal = () => {

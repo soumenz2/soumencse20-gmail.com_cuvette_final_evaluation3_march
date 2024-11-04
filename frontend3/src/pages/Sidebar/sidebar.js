@@ -1,6 +1,6 @@
 import React from 'react'
 import './sidebar.css'
-import { Link, NavLink} from 'react-router-dom';
+import { Link, NavLink,useNavigate} from 'react-router-dom';
 import { DiMagento } from "react-icons/di";
 import { IoMdLogOut } from "react-icons/io";
 import { MdOutlineSpaceDashboard } from "react-icons/md";
@@ -13,11 +13,11 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const Sidebar = () => {
   const dispatch=useDispatch()
+  const navigate = useNavigate();
   const logout=()=>{
    
- 
-   
     dispatch(clearToken())
+    navigate('/')
     setTimeout(() => {
       toast.success("Logout Sucessfully.....")
      },3000);
